@@ -1,7 +1,8 @@
 # Replace with model to test
-import template as Model
+import kma_model as Model
 import data_interface
 import pandas as pd
+from tqdm import tqdm
 
 def run_model(source='test_data') -> tuple[float, int]:
     total_error = 0
@@ -10,11 +11,14 @@ def run_model(source='test_data') -> tuple[float, int]:
         dataset: pd.DataFrame = data_interface.get_symbol(symbol, source=source)
         size = len(dataset)
         
-        for i in range(2, size-2):
+        for i in tqdm(list(range(2, size-2)), desc=symbol):
             in_data = dataset.head(i)
             out_price = dataset['close'].iloc[i+1]
 
             pred_price = Model.next_price(in_data)
+            if pred_price == None:
+                continue
+            
             error = abs(out_price / pred_price)
 
             pred_move = (pred_price / in_data['close'].iloc[-1]) - 1
